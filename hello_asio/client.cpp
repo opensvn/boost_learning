@@ -33,7 +33,7 @@ public:
 private:
     void handle_connect(const boost::system::error_code &ec)
     {
-        cout << __func__ << endl;
+        cout << __PRETTY_FUNCTION__ << endl;
         if (!ec)
         {
             is_connected = true;
@@ -50,7 +50,7 @@ private:
 
     void handle_write(const boost::system::error_code &ec)
     {
-        cout << __func__ << endl;
+        cout << __PRETTY_FUNCTION__ << endl;
         if (!is_connected) return;
 
         if (!ec)
@@ -66,7 +66,7 @@ private:
 
     void handle_read(const boost::system::error_code &ec)
     {
-        cout << __func__ << endl;
+        cout << __PRETTY_FUNCTION__ << endl;
 
         if (!is_connected) return;
 
@@ -86,7 +86,7 @@ private:
 
     void sig_handle()
     {
-        cout << __func__ << endl;
+        cout << __PRETTY_FUNCTION__ << endl;
         is_connected = false;
         sock.close();
     }
