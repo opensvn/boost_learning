@@ -1,5 +1,4 @@
 #include <iostream>
-#include <algorithm>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
@@ -10,24 +9,14 @@
 using namespace std;
 using namespace boost::asio;
 
-static const std::string s = "abcdefghijklmnopqrstuvwxyz"
-        "ABCDEFGHIJKLMNOQPRSTUVWXYZ"
-        "0123456789!@#$%^&*()-_+=\\|`~;:'\"<>,./?";
-
 class Client
 {
 public:
     Client(io_service &ios, std::string host, int port):
-            socket(ios), ep(ip::address::from_string(host), port),
-            sig(ios), writtenMB(0), readMB(0)
+        sendStr(max_len, 'a'),
+        socket(ios), ep(ip::address::from_string(host), port),
+        sig(ios), writtenMB(0), readMB(0)
     {
-        sendStr.reserve(max_len);
-
-        for (std::string::size_type i = 0; i != sendStr.capacity(); ++i)
-        {
-            sendStr.push_back(s[i%s.size()]);
-        }
-
         sig.add(SIGINT);
         sig.add(SIGTERM);
         sig.async_wait(bind(&Client::onSignal, this,
@@ -35,13 +24,13 @@ public:
                             boost::asio::placeholders::signal_number));
 
         memset(read_buf, 0, sizeof(read_buf));
-//        srand(time(0));
     }
 
     ~Client()
     {
         std::cout << IP << ":" << port << " Written: "
-                  << writtenMB * max_len << " Read: " << readMB * max_len << std::endl;
+                  << writtenMB << " Read: " << readMB << std::endl;
+//        close();
     }
 
     void startConnect()
@@ -68,7 +57,6 @@ private:
 
     void startWrite()
     {
-//        shuffle_string(); // 打乱字符串
         async_write(socket, buffer(sendStr),
                     bind(&Client::onWrite, this, placeholders::error));
     }
@@ -83,28 +71,10 @@ private:
 
         writtenMB += 1;
 
-        startRead();
-    }
+//        if (!isConnected) return;
 
-    void startRead()
-    {
-        async_read(socket, buffer(read_buf, max_len),
-                   bind(&Client::onRead, this, placeholders::error));
-    }
-
-    void onRead(const boost::system::error_code &ec)
-    {
-        if (ec)
-        {
-            std::cout << "onRead: " << ec.message() << std::endl;
-            return;
-        }
-
-        readMB += 1;
-
-        std::cout << string(read_buf, read_buf + max_len) << std::endl;
-
-        usleep(10);
+        sleep(1);
+        //usleep(1000);
         startWrite();
     }
 
@@ -119,11 +89,6 @@ private:
         close();
     }
 
-    void shuffle_string()
-    {
-        random_shuffle(sendStr.begin(), sendStr.end());
-    }
-
     void close()
     {
         socket.close();
@@ -136,7 +101,7 @@ private:
     ip::tcp::endpoint ep;
     signal_set sig;
 
-    enum {max_len = 1024};
+    enum {max_len=64};
     char read_buf[max_len];
 
     size_t writtenMB;
@@ -172,6 +137,13 @@ int main(int argc, const char *argv[])
 
     std::list<boost::shared_ptr<Client> > clients;
     boost::thread_group threads;
+//    for (int i = 0; i < clientNum; ++i)
+//    {
+//        boost::shared_ptr<Client> c(new Client(ios, host, port));
+//        clients.push_back(c);
+
+//        threads.create_thread(boost::bind(&Client::startConnect, c));
+//    }
 
     for (int i = 0; i < clientNum; ++i)
     {

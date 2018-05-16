@@ -68,12 +68,12 @@ private:
 
     void startWrite()
     {
-        boost::mutex::scoped_lock lock(mutex);
+//        boost::mutex::scoped_lock lock(mutex);
 
-        if (queue.empty())
-        {
-            return;
-        }
+//        if (queue.empty())
+//        {
+//            return;
+//        }
 
         boost::asio::async_write(socket, buffer(queue.front()),
                                  boost::bind(&Connection::onWrite,
@@ -97,9 +97,9 @@ private:
 
     void add(const std::string& msg)
     {
-        boost::mutex::scoped_lock lock(mutex);
+//        boost::mutex::scoped_lock lock(mutex);
         queue.push(msg);
-        condition.notify_one();
+//        condition.notify_one();
     }
 
 private:
@@ -108,8 +108,8 @@ private:
     char read_buf[max_len];
 
     std::queue<std::string> queue;
-    boost::mutex mutex; /**< 用于读写消息队列 */
-    boost::condition_variable condition; /**< 用于通知队列非空 */
+//    boost::mutex mutex; /**< 用于读写消息队列 */
+//    boost::condition_variable condition; /**< 用于通知队列非空 */
 
     size_t writtenMB;
     size_t readMB;
@@ -123,8 +123,8 @@ class Server
 public:
     typedef boost::shared_ptr<Connection> ConnectionPtr;
 
-    Server(io_service &ios, const ip::tcp::endpoint &ep):
-        ios_(ios), acceptor_(ios, ep)
+    Server(io_service &ios, const ip::tcp::endpoint &ep, const ip::tcp::endpoint &rep):
+        ios_(ios), acceptor_(ios, ep), rep(rep)
     {
     }
 
@@ -134,6 +134,10 @@ public:
         acceptor_.async_accept(new_connection->getSocket(),
                                boost::bind(&Server::onAccept, this,
                                            new_connection, placeholders::error));
+    }
+
+    void startConnect() {
+        
     }
 
 private:
@@ -151,6 +155,7 @@ private:
     ConnectionPtr new_connection;
     io_service &ios_;
     ip::tcp::acceptor acceptor_;
+    ip::tcp::endpoint rep;
 };
 
 ip::tcp::endpoint makeEndpoint(const std::string& ip, int port)
@@ -165,7 +170,9 @@ int main(int argc, const char *argv[])
 {
     Flag flag;
     flag.addOption("h", "", "listening ip");
-    flag.addOption("p", "10001", "listening port");
+    flag.addOption("p", "64389", "listening port");
+    flag.addOption("r", "", "remote server ip");
+    flag.addOption("t", "65377", "remote server port");
 
     if (!flag.parse(argc, argv))
     {
@@ -173,16 +180,18 @@ int main(int argc, const char *argv[])
         return -1;
     }
 
-    std::string ip;
-    int port;
+    std::string ip, remote_ip;
+    int port, remote_port;
 
     flag.getString("h", ip);
     flag.getInt("p", port);
+    flag.getString("r", remote_ip);
+    flag.getInt("t", remote_port);
 
     try
     {
         io_service ios;
-        Server server(ios, makeEndpoint(ip, port));
+        Server server(ios, makeEndpoint(ip, port), makeEndpoint(remote_ip, remote_port));
         server.startAccept();
 
         ios.run();

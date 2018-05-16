@@ -24,7 +24,7 @@ public:
     ~Connection()
     {
         std::cout << remoteIP << ":" << remotePort << " Written: "
-                  << writtenMB * max_len << " Read: " << readMB * max_len << std::endl;
+                  << writtenMB << " Read: " << readMB << std::endl;
     }
 
     void start()
@@ -59,57 +59,13 @@ private:
 
         readMB += 1;
 
-        std::string msg(read_buf, read_buf + max_len);
-        add(msg);
-        std::cout << msg << std::endl;
-
-        startWrite();
-    }
-
-    void startWrite()
-    {
-        boost::mutex::scoped_lock lock(mutex);
-
-        if (queue.empty())
-        {
-            return;
-        }
-
-        boost::asio::async_write(socket, buffer(queue.front()),
-                                 boost::bind(&Connection::onWrite,
-                                             shared_from_this(),
-                                             placeholders::error));
-    }
-
-    void onWrite(const boost::system::error_code &ec)
-    {
-        if (ec)
-        {
-            std::cout << "onWrite: " << ec.message() << std::endl;
-            return;
-        }
-
-        writtenMB += 1;
-        queue.pop();
-
         startRead();
-    }
-
-    void add(const std::string& msg)
-    {
-        boost::mutex::scoped_lock lock(mutex);
-        queue.push(msg);
-        condition.notify_one();
     }
 
 private:
     ip::tcp::socket socket;
-    enum {max_len = 1024}; // 1MB
+    enum {max_len = 1024 * 64}; // 1MB
     char read_buf[max_len];
-
-    std::queue<std::string> queue;
-    boost::mutex mutex; /**< 用于读写消息队列 */
-    boost::condition_variable condition; /**< 用于通知队列非空 */
 
     size_t writtenMB;
     size_t readMB;
@@ -182,6 +138,7 @@ int main(int argc, const char *argv[])
     try
     {
         io_service ios;
+
         Server server(ios, makeEndpoint(ip, port));
         server.startAccept();
 
