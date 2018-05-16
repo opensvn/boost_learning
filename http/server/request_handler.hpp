@@ -21,8 +21,7 @@ struct reply;
 struct request;
 
 /// The common handler for all incoming requests.
-class request_handler
-        : private boost::noncopyable
+class request_handler: private boost::noncopyable
 {
 public:
     /// Construct with a directory containing files to be served.

@@ -9,8 +9,7 @@ int main()
 {
     boost::interprocess::shared_memory_object::remove("Highscore");
     boost::interprocess::managed_shared_memory managed_shm(
-            boost::interprocess::open_or_create,
-            "Highscore", 1024);
+        boost::interprocess::open_or_create, "Highscore", 1024);
 
     typedef boost::interprocess::allocator<char, boost::interprocess::managed_shared_memory::segment_manager> CharAllocator;
     typedef boost::interprocess::basic_string<char, char_traits<char>, CharAllocator> bstring;

@@ -54,6 +54,7 @@ private:
         ;
     }
 
+private:
     sock_ptr new_connection;
     io_service &ios_;
     ip::tcp::acceptor acceptor_;

@@ -15,7 +15,7 @@ namespace http {
 namespace server {
 
 request_parser::request_parser()
-        : state_(method_start)
+    : state_(method_start)
 {
 }
 

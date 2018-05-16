@@ -28,8 +28,8 @@ class connection_manager;
 
 /// Represents a single connection from a client.
 class connection
-        : public boost::enable_shared_from_this<connection>,
-          private boost::noncopyable
+    : public boost::enable_shared_from_this<connection>,
+      private boost::noncopyable
 {
 public:
     /// Construct a connection with the given io_service.

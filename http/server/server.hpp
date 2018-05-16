@@ -22,8 +22,7 @@ namespace http {
 namespace server {
 
 /// The top-level class of the HTTP server.
-class server
-        : private boost::noncopyable
+class server: private boost::noncopyable
 {
 public:
     /// Construct the server to listen on the specified TCP address and port, and

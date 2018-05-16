@@ -30,6 +30,7 @@ public:
         sock.async_connect(ep, bind(&Client::handle_connect, this,
                                     placeholders::error));
     }
+
 private:
     void handle_connect(const boost::system::error_code &ec)
     {
@@ -44,6 +45,7 @@ private:
         }
         else
         {
+            std::cout << "connect error!" << ec.message() << std::endl;
             sock.close();
         }
     }
@@ -96,6 +98,7 @@ private:
         random_shuffle(send_str.begin(), send_str.end());
     }
 
+private:
     std::string send_str;
 
     ip::tcp::socket sock;
@@ -119,5 +122,6 @@ int main(int argc, const char *argv[])
     Client c(ios, argv[1], atoi(argv[2]));
 
     ios.run();
+
     return 0;
 }

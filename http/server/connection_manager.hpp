@@ -20,8 +20,7 @@ namespace server {
 
 /// Manages open connections so that they may be cleanly stopped when the server
 /// needs to shut down.
-class connection_manager
-        : private boost::noncopyable
+class connection_manager: private boost::noncopyable
 {
 public:
     /// Add the specified connection to the manager and start it.

@@ -20,10 +20,8 @@ using boost::asio::ip::tcp;
 class client
 {
 public:
-    client(boost::asio::io_service &io_service,
-           const std::string &server, const std::string &path)
-            : resolver_(io_service),
-              socket_(io_service)
+    client(boost::asio::io_service &io_service, const std::string &server,
+           const std::string &path): resolver_(io_service), socket_(io_service)
     {
         // Form the request. We specify the "Connection: close" header so that the
         // server will close the socket after transmitting the response. This will

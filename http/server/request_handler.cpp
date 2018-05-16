@@ -21,7 +21,7 @@ namespace http {
 namespace server {
 
 request_handler::request_handler(const std::string &doc_root)
-        : doc_root_(doc_root)
+    : doc_root_(doc_root)
 {
 }
 
